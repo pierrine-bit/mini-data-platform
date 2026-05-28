@@ -1,0 +1,33 @@
+```gitignore
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+venv/
+
+# Environment variables
+.env
+
+# Airflow
+airflow.db
+airflow-webserver.pid
+logs/
+
+# Python test cache
+.pytest_cache/
+
+# IDE
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+
+# Generated data files
+data/*.csv
+
+# Docker volumes / temp files
+tmp/
+```

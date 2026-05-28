@@ -1,0 +1,62 @@
+name: Mini Data Platform CI/CD
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test-and-validate:
+    runs-on: ubuntu-latest
+
+    env:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Run unit tests
+        run: |
+          pytest tests/
+
+      - name: Validate Docker Compose
+        run: |
+          docker compose config
+
+      - name: Start stack
+        run: |
+          docker compose up -d
+          sleep 60
+
+      - name: Check running containers
+        run: |
+          docker ps
+
+      - name: Validate PostgreSQL
+        run: |
+          docker exec postgres pg_isready -U airflow -d airflow
+
+      - name: Simulated data flow validation
+        run: |
+          echo "CI validates code, compose config, stack startup, and PostgreSQL readiness."
+          echo "CD can deploy this same compose stack to a test server using SSH or a managed Docker host."
+
+      - name: Stop stack
+        if: always()
+        run: |
+          docker compose down -v
