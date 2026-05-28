@@ -1,4 +1,4 @@
-```gitignore
+
 # Python
 __pycache__/
 *.pyc
@@ -14,7 +14,7 @@ venv/
 airflow.db
 airflow-webserver.pid
 logs/
-
+airflow-config/passwords.json
 # Python test cache
 .pytest_cache/
 
@@ -30,4 +30,3 @@ data/*.csv
 
 # Docker volumes / temp files
 tmp/
-```
