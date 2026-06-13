@@ -1,4 +1,3 @@
-"""Extract sales data from MinIO and filter already-loaded records."""
 
 import logging
 import os

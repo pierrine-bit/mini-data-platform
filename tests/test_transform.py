@@ -1,4 +1,3 @@
-"""Tests for sales transformation logic."""
 
 import os
 import sys

@@ -1,4 +1,3 @@
-"""Validation rules for sales data quality checks."""
 
 import logging
 

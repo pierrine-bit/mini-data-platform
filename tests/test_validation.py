@@ -1,4 +1,3 @@
-"""Tests for sales data validation rules."""
 
 import os
 import sys

@@ -1,4 +1,3 @@
-"""Utility functions for interacting with MinIO object storage."""
 
 import logging
 import os

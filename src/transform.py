@@ -1,4 +1,3 @@
-"""Transform raw sales data into a clean loading-ready dataset."""
 
 import logging
 

@@ -1,4 +1,3 @@
-"""Load validated sales records into PostgreSQL."""
 
 import logging
 import os
