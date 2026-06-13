@@ -1,4 +1,3 @@
-
 import logging
 import os
 
@@ -7,21 +6,24 @@ from sqlalchemy import create_engine, text
 
 logger = logging.getLogger(__name__)
 
-DB_URI = os.getenv(
-    "DB_URI",
-    "postgresql+psycopg2://airflow:airflow@postgres:5432/airflow",
-)
+
+def _build_db_uri() -> str:
+    return os.getenv("DB_URI") or (
+        f"postgresql+psycopg2://{os.getenv('POSTGRES_USER')}:{os.getenv('POSTGRES_PASSWORD')}"
+        f"@{os.getenv('POSTGRES_HOST', 'postgres')}:{os.getenv('POSTGRES_PORT', '5432')}"
+        f"/{os.getenv('POSTGRES_DB')}"
+    )
 
 
 def load_data(df: pd.DataFrame) -> int:
-    """Append new sales records to PostgreSQL and return inserted row count."""
     if df.empty:
         logger.info("No records to load")
         return 0
 
-    engine = create_engine(DB_URI)
+    engine = create_engine(_build_db_uri())
 
     with engine.begin() as conn:
+        # Skip records already in the table to avoid duplicates
         existing = pd.read_sql(text("SELECT order_id FROM sales"), conn)
         df = df[~df["order_id"].isin(existing["order_id"])]
 

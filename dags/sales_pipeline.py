@@ -1,5 +1,6 @@
 
 import logging
+import os
 import sys
 from datetime import datetime, timedelta
 
@@ -10,7 +11,7 @@ from airflow.decorators import dag, task
 logger = logging.getLogger(__name__)
 
 default_args = {
-    "owner": "pierrine",
+    "owner": os.getenv("AIRFLOW_ADMIN_USER", "airflow"),
     "depends_on_past": False,
     "retries": 2,
     "retry_delay": timedelta(minutes=2),
@@ -30,6 +31,7 @@ def sales_etl_pipeline():
 
     @task
     def check_source() -> None:
+        # Abort early if source file is missing
         from minio_client import sales_file_exists
         if not sales_file_exists():
             raise FileNotFoundError("sales_data.csv not found in MinIO bucket")

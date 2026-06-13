@@ -10,9 +10,9 @@ load_dotenv(os.path.join(os.path.dirname(__file__), "..", ".env"))
 logging.basicConfig(level=logging.INFO, format="[%(asctime)s] %(message)s", datefmt="%H:%M:%S")
 log = logging.getLogger(__name__)
 
-METABASE_URL = "http://localhost:3001"
-EMAIL = os.getenv("METABASE_EMAIL", "nkurangapierrine@gmail.com")
-PASSWORD = os.getenv("METABASE_PASSWORD", "Metabase@2026")
+METABASE_URL = os.getenv("METABASE_URL", "http://localhost:3001")
+EMAIL = os.getenv("METABASE_EMAIL")
+PASSWORD = os.getenv("METABASE_PASSWORD")
 
 session = requests.Session()
 
@@ -39,8 +39,8 @@ def setup_metabase():
     payload = {
         "token": setup_token,
         "user": {
-            "first_name": "Pierrine",
-            "last_name": "M.nkuranga",
+            "first_name": os.getenv("METABASE_FIRST_NAME", "Admin"),
+            "last_name": os.getenv("METABASE_LAST_NAME", "User"),
             "email": EMAIL,
             "password": PASSWORD,
             "site_name": "Mini Data Platform",
@@ -72,11 +72,11 @@ def get_or_create_database():
         "name": "Mini Data Platform",
         "engine": "postgres",
         "details": {
-            "host": "postgres",
-            "port": 5432,
-            "dbname": "airflow",
-            "user": "airflow",
-            "password": "airflow",
+            "host": os.getenv("POSTGRES_HOST", "postgres"),
+            "port": int(os.getenv("POSTGRES_PORT", "5432")),
+            "dbname": os.getenv("POSTGRES_DB"),
+            "user": os.getenv("POSTGRES_USER"),
+            "password": os.getenv("POSTGRES_PASSWORD"),
             "schema-filters-type": "all",
             "ssl": False,
         },
@@ -150,6 +150,7 @@ def create_dashboard(name):
 
 
 def add_all_cards_to_dashboard(dashboard_id, cards):
+    # PUT replaces all cards atomically — must send the full list in one call
     payload = {"cards": cards}
     res = session.put(f"{METABASE_URL}/api/dashboard/{dashboard_id}/cards", json=payload)
     res.raise_for_status()
@@ -294,6 +295,7 @@ def main():
         "- Use the monthly trend to spot seasonality and growth patterns"
     )
 
+    # Negative ids are temporary client-side identifiers required by the API for new cards
     cards = [
         {
             "id": -1,

@@ -25,10 +25,12 @@ PRODUCT_PRICES = {
     "Phone": (400, 1500),
 }
 
+# Reused pool simulates repeat buyers instead of every order having a unique customer
 CUSTOMER_POOL = [fake.uuid4() for _ in range(200)]
 
 
 def generate_sales_data(rows: int = 2000) -> pd.DataFrame:
+    """Generate realistic sales data with product-specific price ranges."""
     data = []
     for _ in range(rows):
         product = random.choice(PRODUCTS)

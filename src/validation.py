@@ -17,7 +17,7 @@ VALID_REGIONS = {"Africa", "Europe", "Asia", "America"}
 
 
 def validate_sales(df) -> None:
-    """Validate sales data before loading into PostgreSQL."""
+    """Raises ValueError if the DataFrame fails any data quality check."""
     logger.info("Running sales data validation")
 
     if df.empty:

@@ -1,4 +1,3 @@
-
 import logging
 import os
 
@@ -9,27 +8,20 @@ from minio_client import download_sales_file
 
 logger = logging.getLogger(__name__)
 
-LOCAL_FILE = "/opt/airflow/data/sales_data.csv"
-
-DB_HOST = os.getenv("POSTGRES_HOST", "postgres")
-DB_NAME = os.getenv("POSTGRES_DB", "airflow")
-DB_USER = os.getenv("POSTGRES_USER", "airflow")
-DB_PASSWORD = os.getenv("POSTGRES_PASSWORD", "airflow")
+LOCAL_FILE = os.getenv("AIRFLOW_DATA_PATH", "/opt/airflow/data/sales_data.csv")
 
 
 def get_last_loaded_date():
-    """Return the latest loaded order date from PostgreSQL."""
+    """Returns None on failure, which triggers a full load in extract_data."""
     try:
         conn = psycopg2.connect(
-            host=DB_HOST,
-            database=DB_NAME,
-            user=DB_USER,
-            password=DB_PASSWORD,
+            host=os.getenv("POSTGRES_HOST", "postgres"),
+            database=os.getenv("POSTGRES_DB"),
+            user=os.getenv("POSTGRES_USER"),
+            password=os.getenv("POSTGRES_PASSWORD"),
         )
-
         result = pd.read_sql("SELECT MAX(order_date) FROM sales;", conn)
         conn.close()
-
         return result.iloc[0, 0]
 
     except Exception as exc:
@@ -38,7 +30,7 @@ def get_last_loaded_date():
 
 
 def extract_data(file_path: str = LOCAL_FILE) -> pd.DataFrame:
-    """Download sales CSV and return only new records."""
+    """Downloads from MinIO and returns only records newer than the last load."""
     download_sales_file(file_path)
 
     df = pd.read_csv(file_path)
