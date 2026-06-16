@@ -316,7 +316,7 @@ def main():
     ]
 
     add_all_cards_to_dashboard(dash_id, cards)
-    log.info(f"Open your dashboard at: {METABASE_URL}/dashboard/{dash_id}")
+    log.info(f"Done! Open your dashboard at: {METABASE_URL}/dashboard/{dash_id}")
 
 
 if __name__ == "__main__":

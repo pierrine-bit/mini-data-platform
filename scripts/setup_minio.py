@@ -1,3 +1,4 @@
+import logging
 import os
 import sys
 from pathlib import Path
@@ -7,6 +8,13 @@ from botocore.exceptions import ClientError
 from dotenv import load_dotenv
 
 load_dotenv(os.path.join(os.path.dirname(__file__), "..", ".env"))
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="[%(asctime)s] %(message)s",
+    datefmt="%H:%M:%S",
+)
+log = logging.getLogger(__name__)
 
 ENDPOINT = os.getenv("MINIO_ENDPOINT", "http://localhost:9000")
 ACCESS_KEY = os.getenv("MINIO_ROOT_USER")
@@ -26,17 +34,32 @@ def main():
 
     try:
         client.head_bucket(Bucket=BUCKET)
-        print(f"Bucket '{BUCKET}' already exists.")
+        log.info("Bucket '%s' already exists.", BUCKET)
     except ClientError:
         client.create_bucket(Bucket=BUCKET)
-        print(f"Created bucket '{BUCKET}'.")
+        log.info("Created bucket '%s'.", BUCKET)
 
     if not LOCAL_FILE.exists():
-        print(f"ERROR: {LOCAL_FILE} not found. Run: python scripts/generate_sample_data.py")
+        log.error(
+            "%s not found. Run: python scripts/generate_sample_data.py",
+            LOCAL_FILE,
+        )
         sys.exit(1)
 
-    client.upload_file(str(LOCAL_FILE), BUCKET, os.getenv("MINIO_OBJECT", "sales_data.csv"))
-    print(f"Uploaded {LOCAL_FILE} → s3://{BUCKET}/sales_data.csv")
+    object_name = os.getenv("MINIO_OBJECT", "sales_data.csv")
+
+    client.upload_file(
+        str(LOCAL_FILE),
+        BUCKET,
+        object_name,
+    )
+
+    log.info(
+        "Uploaded %s -> s3://%s/%s",
+        LOCAL_FILE,
+        BUCKET,
+        object_name,
+    )
 
 
 if __name__ == "__main__":
