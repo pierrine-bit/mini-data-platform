@@ -4,7 +4,6 @@ import sys
 from pathlib import Path
 
 import boto3
-from botocore.exceptions import ClientError
 from dotenv import load_dotenv
 
 load_dotenv(os.path.join(os.path.dirname(__file__), "..", ".env"))
@@ -24,21 +23,6 @@ LOCAL_FILE = Path("data/sales_data.csv")
 
 
 def main():
-    """Creates the MinIO bucket if absent, then uploads the local sales CSV."""
-    client = boto3.client(
-        "s3",
-        endpoint_url=ENDPOINT,
-        aws_access_key_id=ACCESS_KEY,
-        aws_secret_access_key=SECRET_KEY,
-    )
-
-    try:
-        client.head_bucket(Bucket=BUCKET)
-        log.info("Bucket '%s' already exists.", BUCKET)
-    except ClientError:
-        client.create_bucket(Bucket=BUCKET)
-        log.info("Created bucket '%s'.", BUCKET)
-
     if not LOCAL_FILE.exists():
         log.error(
             "%s not found. Run: python scripts/generate_sample_data.py",
@@ -46,20 +30,16 @@ def main():
         )
         sys.exit(1)
 
+    client = boto3.client(
+        "s3",
+        endpoint_url=ENDPOINT,
+        aws_access_key_id=ACCESS_KEY,
+        aws_secret_access_key=SECRET_KEY,
+    )
+
     object_name = os.getenv("MINIO_OBJECT", "sales_data.csv")
-
-    client.upload_file(
-        str(LOCAL_FILE),
-        BUCKET,
-        object_name,
-    )
-
-    log.info(
-        "Uploaded %s -> s3://%s/%s",
-        LOCAL_FILE,
-        BUCKET,
-        object_name,
-    )
+    client.upload_file(str(LOCAL_FILE), BUCKET, object_name)
+    log.info("Uploaded %s -> s3://%s/%s", LOCAL_FILE, BUCKET, object_name)
 
 
 if __name__ == "__main__":

@@ -32,7 +32,7 @@ def sales_etl_pipeline():
     @task
     def check_source() -> None:
         # Abort early if source file is missing
-        from minio_client import sales_file_exists
+        from extract import sales_file_exists
         if not sales_file_exists():
             raise FileNotFoundError("sales_data.csv not found in MinIO bucket")
 
