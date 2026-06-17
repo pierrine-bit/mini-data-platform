@@ -43,10 +43,10 @@ jobs:
         run: |
           docker compose config
 
-      - name: Start stack
+      - name: Start core services
         run: |
-          docker compose up -d
-          sleep 60
+          docker compose up -d postgres minio minio-init
+          sleep 30
 
       - name: Check running containers
         run: |
@@ -54,7 +54,11 @@ jobs:
 
       - name: Validate PostgreSQL
         run: |
-          docker exec postgres pg_isready -U airflow -d airflow
+          docker exec postgres pg_isready -U $POSTGRES_USER -d $POSTGRES_DB
+
+      - name: Validate MinIO
+        run: |
+          docker exec minio curl -sf http://localhost:9000/minio/health/live
 
       - name: Simulated data flow validation
         run: |
