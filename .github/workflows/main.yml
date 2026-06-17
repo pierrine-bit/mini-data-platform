@@ -17,6 +17,10 @@ jobs:
       MINIO_ROOT_USER: minioadmin
       MINIO_ROOT_PASSWORD: minioadmin
       MINIO_BUCKET: sales-data
+      AIRFLOW_ADMIN_USER: admin
+      AIRFLOW_ADMIN_PASSWORD: admin
+      AIRFLOW_SECRET_KEY: ci-secret-key-for-testing-only
+      AIRFLOW_JWT_SECRET: ci-jwt-secret-for-testing-only
 
     steps:
       - name: Checkout repository
